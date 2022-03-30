@@ -784,3 +784,9 @@ extension KeyEvent {
     }
   }
 }
+
+extension KeyEvent: Codable { }
+
+extension KeyEvent.Key: Codable { }
+
+extension KeyEvent.Modifier: Codable { }
