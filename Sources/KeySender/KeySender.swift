@@ -110,26 +110,30 @@ extension KeySender {
     return target
   }
   
-  private func createEvent(from keyEvent: KeyEvent) -> CGEvent? {
+  private func createEvent(from keyEvent: KeyEvent, keyDown: Bool) -> CGEvent? {
     // Create the event.
     let postableEvent = CGEvent(
       keyboardEventSource: .init(stateID: .hidSystemState),
       virtualKey: CGKeyCode(keyEvent.key.rawValue),
-      keyDown: true)
+      keyDown: keyDown)
     // Give it the appropriate modifiers flags.
     postableEvent?.flags = KeyEvent.Modifier.flags(for: keyEvent.modifiers)
     return postableEvent
   }
   
   // All other send methods delegate to this one.
-  private func send(event: KeyEvent, to application: NSRunningApplication) {
-    let postableEvent = createEvent(from: event)
-    postableEvent?.postToPid(application.processIdentifier)
+  private func send(event: KeyEvent, to application: NSRunningApplication, sendKeyUp: Bool) {
+    createEvent(from: event, keyDown: true)?.postToPid(application.processIdentifier)
+    if sendKeyUp {
+      createEvent(from: event, keyDown: false)?.postToPid(application.processIdentifier)
+    }
   }
   
-  private func sendGlobally(event: KeyEvent) {
-    let postableEvent = createEvent(from: event)
-    postableEvent?.post(tap: .cghidEventTap)
+  private func sendGlobally(event: KeyEvent, sendKeyUp: Bool) {
+    createEvent(from: event, keyDown: true)?.post(tap: .cghidEventTap)
+    if sendKeyUp {
+      createEvent(from: event, keyDown: false)?.post(tap: .cghidEventTap)
+    }
   }
 }
 
@@ -139,27 +143,27 @@ extension KeySender {
   /// Sends this instance's events to the given running application.
   /// - Parameter application: An instance of `NSRunningApplication` that will
   /// receive the event.
-  public func send(to application: NSRunningApplication) {
+  public func send(to application: NSRunningApplication, sendKeyUp: Bool = true) {
     for event in events {
-      send(event: event, to: application)
+      send(event: event, to: application, sendKeyUp: sendKeyUp)
     }
   }
   
   /// Sends this instance's events to the application with the given name.
   /// - Parameter application: The name of the application that will receive the
   /// event.
-  public func send(to application: String) throws {
+  public func send(to application: String, sendKeyUp: Bool = true) throws {
     let target = try getTarget(from: application)
-    send(to: target)
+    send(to: target, sendKeyUp: sendKeyUp)
   }
   
   /// Attempts to send this instance's events to the application with the given
   /// name, printing an error to the console if the operation fails.
   /// - Parameter application: The name of the application that will receive the
   /// event.
-  public func trySend(to application: String) {
+  public func trySend(to application: String, sendKeyUp: Bool = true) {
     do {
-      try send(to: application)
+      try send(to: application, sendKeyUp: sendKeyUp)
     } catch {
       print(error.localizedDescription)
     }
@@ -167,9 +171,9 @@ extension KeySender {
   
   /// Sends this instance's events globally, making the events visible to the
   /// system, rather than a single application.
-  public func sendGlobally() {
+  public func sendGlobally(sendKeyUp: Bool = true) {
     for event in events {
-      sendGlobally(event: event)
+      sendGlobally(event: event, sendKeyUp: sendKeyUp)
     }
   }
 }
