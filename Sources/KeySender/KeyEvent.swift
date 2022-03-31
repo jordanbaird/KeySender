@@ -9,6 +9,8 @@
 import Carbon.HIToolbox
 import CoreGraphics
 
+// MARK: - KeyEvent
+
 /// A representation of a key event that can be sent by an
 /// instance of `KeySender`.
 public struct KeyEvent {
@@ -30,11 +32,14 @@ public struct KeyEvent {
   }
 }
 
+// MARK: - Key
+
 extension KeyEvent {
   /// Constants that represent the various keys available on a keyboard.
   public enum Key: CaseIterable {
     
-    // MARK: - ANSI
+    // MARK: - Key: ANSI
+    
     /// The ANSI A key.
     case a
     /// The ANSI B key.
@@ -169,7 +174,7 @@ extension KeyEvent {
     /// The ANSI keypad 9 key.
     case keypad9
     
-    // MARK: - Layout-independent
+    // MARK: - Key: Layout-independent
     
     /// The layout-independent Return key.
     case `return`
@@ -248,12 +253,12 @@ extension KeyEvent {
     /// The layout-independent F20 key.
     case f20
     
-    // MARK: - ISO
+    // MARK: - Key: ISO
     
     /// The Section key that is available on ISO keyboards.
     case isoSection
     
-    // MARK: - JIS
+    // MARK: - Key: JIS
     
     /// The Yen key that is available on JIS keyboards.
     case jisYen
@@ -489,6 +494,8 @@ extension KeyEvent {
       }
     }
     
+    // MARK: - Key: String Value
+    
     var stringValue: String? {
       switch self {
       case .a:
@@ -710,6 +717,8 @@ extension KeyEvent {
       }
     }
     
+    // MARK: - Key: Init
+    
     init?(_ string: String) {
       let key = Self.allCases.first(where: {
         $0.stringValue?.lowercased() == string.lowercased()
@@ -775,6 +784,8 @@ extension KeyEvent {
       }
     }
     
+    // MARK: - Modifiers: Static Functions
+    
     static func flags(for modifiers: [Self]) -> CGEventFlags {
       var flags = CGEventFlags()
       for modifier in modifiers {
@@ -784,6 +795,8 @@ extension KeyEvent {
     }
   }
 }
+
+// MARK: - Conformances
 
 extension KeyEvent: Codable { }
 
