@@ -42,7 +42,7 @@ try sender.send(to: "TextEdit")
 let sender = KeySender(string: "Hello")
 sender.trySend(to: "TextEdit")
 
-let sender = KeySender(key. space, modifiers: .command)
+let sender = KeySender(key: .space, modifiers: .command)
 sender.sendGlobally()
 ```
 > Note: As KeySender is under active development, source stability is not guaranteed between releases.
