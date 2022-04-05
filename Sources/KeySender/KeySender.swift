@@ -181,4 +181,11 @@ extension KeySender {
     }
     send(to: application)
   }
+  
+  /// Sends this instance's events to every running application.
+  public func sendToAllApplications(sendKeyUp: Bool = true) {
+    for application in NSWorkspace.shared.runningApplications {
+      send(to: application, sendKeyUp: sendKeyUp)
+    }
+  }
 }
