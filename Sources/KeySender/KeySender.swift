@@ -141,7 +141,8 @@ extension KeySender {
 
 extension KeySender {
   /// Sends this instance's events to the given running application.
-  /// - Parameter application: An instance of `NSRunningApplication` that will receive the event.
+  /// - Parameter application: An instance of `NSRunningApplication` that will receive
+  /// the event.
   public func send(to application: NSRunningApplication, sendKeyUp: Bool = true) {
     for event in events {
       sendLocally(event: event, application: application, sendKeyUp: sendKeyUp)
@@ -174,7 +175,8 @@ extension KeySender {
     }
   }
   
-  /// Sends this instance's events to the application that has focus in the shared workspace.
+  /// Sends this instance's events to the application that has focus in the shared
+  /// workspace.
   public func sendToFrontmostApplication(sendKeyUp: Bool = true) throws {
     guard let application = NSWorkspace.shared.frontmostApplication else {
       throw KeySenderError("No frontmost application exists.")
@@ -186,6 +188,16 @@ extension KeySender {
   public func sendToAllApplications(sendKeyUp: Bool = true) {
     for application in NSWorkspace.shared.runningApplications {
       send(to: application, sendKeyUp: sendKeyUp)
+    }
+  }
+  
+  /// Sends this instance's events to every running application that matches the
+  /// given predicate.
+  public func send(where predicate: (NSRunningApplication) throws -> Bool) rethrows {
+    for application in NSWorkspace.shared.runningApplications {
+      if try predicate(application) {
+        send(to: application)
+      }
     }
   }
 }
