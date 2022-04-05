@@ -200,4 +200,26 @@ extension KeySender {
       }
     }
   }
+  
+  /// Opens the given application (if it is not already open), and sends this
+  /// instance's events.
+  public func openApplicationAndSend(_ application: String) throws {
+    if let application = NSWorkspace.shared.runningApplications.first(where: {
+      $0.localizedName?.lowercased() == application.lowercased()
+    }) {
+      send(to: application)
+    } else {
+      let process = Process()
+      process.arguments = ["-a", application]
+      if #available(macOS 10.13, *) {
+        process.executableURL = .init(fileURLWithPath: "/usr/bin/open")
+        try process.run()
+      } else {
+        process.launchPath = "/usr/bin/open"
+        process.launch()
+      }
+      process.waitUntilExit()
+      try openApplicationAndSend(application)
+    }
+  }
 }

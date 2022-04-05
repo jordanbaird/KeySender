@@ -10,7 +10,7 @@ import XCTest
 @testable import KeySender
 
 final class KeySenderTests: XCTestCase {
-  func testEmpty() {
-    // No-op
+  func testOpenAndSend() throws {
+    try KeySender(for: "Hello").openApplicationAndSend("TextEdit")
   }
 }
