@@ -173,4 +173,12 @@ extension KeySender {
       sendGlobally(event: event, sendKeyUp: sendKeyUp)
     }
   }
+  
+  /// Sends this instance's events to the application that has focus in the shared workspace.
+  public func sendToFrontmostApplication(sendKeyUp: Bool = true) throws {
+    guard let application = NSWorkspace.shared.frontmostApplication else {
+      throw KeySenderError("No frontmost application exists.")
+    }
+    send(to: application)
+  }
 }
