@@ -13,7 +13,7 @@ import PackageDescription
 let package = Package(
     name: "PackageName",
     dependencies: [
-        .package(url: "https://github.com/jordanbaird/KeySender", from: "0.0.1")
+        .package(url: "https://github.com/jordanbaird/KeySender", from: "0.0.4")
     ],
     targets: [
         .target(
