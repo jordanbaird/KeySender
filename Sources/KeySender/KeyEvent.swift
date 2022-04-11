@@ -273,7 +273,8 @@ extension KeyEvent {
     
     // MARK: - Key: Raw Value
     
-    var rawValue: Int {
+    /// The raw value of this key.
+    public var rawValue: Int {
       switch self {
       case .a:
         return kVK_ANSI_A
