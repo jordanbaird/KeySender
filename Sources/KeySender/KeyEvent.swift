@@ -497,7 +497,8 @@ extension KeyEvent {
     
     // MARK: - Key: String Value
     
-    var stringValue: String? {
+    /// A string representation of the key.
+    public var stringValue: String {
       switch self {
       case .a:
         return "a"
@@ -600,9 +601,9 @@ extension KeyEvent {
       case .keypadPlus:
         return "+"
       case .keypadClear:
-        return nil
+        return "⌧"
       case .keypadDivide:
-        return "/"
+        return "÷"
       case .keypadEnter:
         return "\n"
       case .keypadMinus:
@@ -636,75 +637,75 @@ extension KeyEvent {
       case .space:
         return " "
       case .delete:
-        return nil
+        return "⌫"
       case .forwardDelete:
-        return nil
+        return "⌦"
       case .escape:
-        return nil
+        return "⎋"
       case .volumeUp:
-        return nil
+        return "􏿮"
       case .volumeDown:
-        return nil
+        return "􏿮"
       case .mute:
-        return nil
+        return "􏿮"
       case .home:
-        return nil
+        return "⇱"
       case .end:
-        return nil
+        return "⇲"
       case .pageUp:
-        return nil
+        return "⇞"
       case .pageDown:
-        return nil
+        return "⇟"
       case .leftArrow:
-        return nil
+        return "←"
       case .rightArrow:
-        return nil
+        return "→"
       case .downArrow:
-        return nil
+        return "↓"
       case .upArrow:
-        return nil
+        return "↑"
       case .f1:
-        return nil
+        return "F1"
       case .f2:
-        return nil
+        return "F2"
       case .f3:
-        return nil
+        return "F3"
       case .f4:
-        return nil
+        return "F4"
       case .f5:
-        return nil
+        return "F5"
       case .f6:
-        return nil
+        return "F6"
       case .f7:
-        return nil
+        return "F7"
       case .f8:
-        return nil
+        return "F8"
       case .f9:
-        return nil
+        return "F9"
       case .f10:
-        return nil
+        return "F10"
       case .f11:
-        return nil
+        return "F11"
       case .f12:
-        return nil
+        return "F12"
       case .f13:
-        return nil
+        return "F13"
       case .f14:
-        return nil
+        return "F14"
       case .f15:
-        return nil
+        return "F15"
       case .f16:
-        return nil
+        return "F16"
       case .f17:
-        return nil
+        return "F17"
       case .f18:
-        return nil
+        return "F18"
       case .f19:
-        return nil
+        return "F19"
       case .f20:
-        return nil
+        return "F20"
       case .isoSection:
-        return nil
+        return "§"
       case .jisYen:
         return "¥"
       case .jisUnderscore:
@@ -722,7 +723,7 @@ extension KeyEvent {
     
     init?(_ string: String) {
       let key = Self.allCases.first(where: {
-        $0.stringValue?.lowercased() == string.lowercased()
+        $0.stringValue.lowercased() == string.lowercased()
       })
       if let key = key {
         self = key
@@ -782,6 +783,28 @@ extension KeyEvent {
         return .maskAlternate
       case .shift:
         return .maskShift
+      }
+    }
+    
+    /// A string representation of the modifier.
+    public var stringValue: String {
+      switch self {
+      case .capsLock:
+        return "⇪"
+      case .command:
+        return "⌘"
+      case .control:
+        return "⌃"
+      case .function:
+        return "fn"
+      case .help:
+        return "􏿮"
+      case .numPad:
+        return "􏿮"
+      case .option:
+        return "⌥"
+      case .shift:
+        return "⇧"
       }
     }
     
