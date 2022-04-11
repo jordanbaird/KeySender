@@ -827,3 +827,15 @@ extension KeyEvent: Codable { }
 extension KeyEvent.Key: Codable { }
 
 extension KeyEvent.Modifier: Codable { }
+
+extension KeyEvent: Equatable { }
+
+extension KeyEvent.Key: Equatable { }
+
+extension KeyEvent.Modifier: Equatable { }
+
+extension KeyEvent: Hashable { }
+
+extension KeyEvent.Key: Hashable { }
+
+extension KeyEvent.Modifier: Hashable { }
