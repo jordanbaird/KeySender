@@ -2,7 +2,7 @@
 
 ![Swift](https://img.shields.io/badge/Swift-5.5%2B-orange)
 ![Release](https://img.shields.io/github/v/release/jordanbaird/KeySender)
-![Workflow](https://img.shields.io/github/workflow/status/jordanbaird/KeySender/Swift)
+![Workflow](https://img.shields.io/github/workflow/status/jordanbaird/KeySender/Build%20and%20Test)
 [![License](https://img.shields.io/github/license/jordanbaird/KeySender)](https://github.com/jordanbaird/KeySender/blob/main/LICENSE)
 
 An extremely simple micro package that enables you to send key events to any 
