@@ -1,10 +1,7 @@
-//===----------------------------------------------------------------------===//
 //
-// KeySendingError.swift
+// KeySenderError.swift
+// KeySender
 //
-// Created: 2022. Author: Jordan Baird.
-//
-//===----------------------------------------------------------------------===//
 
 import Foundation
 

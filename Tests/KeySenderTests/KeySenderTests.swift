@@ -1,10 +1,7 @@
-//===----------------------------------------------------------------------===//
 //
 // KeySenderTests.swift
+// KeySender
 //
-// Created: 2022. Author: Jordan Baird.
-//
-//===----------------------------------------------------------------------===//
 
 import XCTest
 @testable import KeySender
