@@ -29,13 +29,19 @@ public struct KeyEvent {
     }
 }
 
-// MARK: - Key
+extension KeyEvent: Codable { }
+
+extension KeyEvent: Equatable { }
+
+extension KeyEvent: Hashable { }
+
+// MARK: - KeyEvent.Key
 
 extension KeyEvent {
     /// Constants that represent the various keys available on a keyboard.
     public enum Key: CaseIterable {
 
-        // MARK: - Key: ANSI
+        // MARK: ANSI
 
         /// The ANSI A key.
         case a
@@ -171,7 +177,7 @@ extension KeyEvent {
         /// The ANSI keypad 9 key.
         case keypad9
 
-        // MARK: - Key: Layout-independent
+        // MARK: Layout-independent
 
         /// The layout-independent Return key.
         case `return`
@@ -250,12 +256,12 @@ extension KeyEvent {
         /// The layout-independent F20 key.
         case f20
 
-        // MARK: - Key: ISO
+        // MARK: ISO
 
         /// The Section key that is available on ISO keyboards.
         case isoSection
 
-        // MARK: - Key: JIS
+        // MARK: JIS
 
         /// The Yen key that is available on JIS keyboards.
         case jisYen
@@ -268,7 +274,7 @@ extension KeyEvent {
         /// The Kana key that is available on JIS keyboards.
         case jisKana
 
-        // MARK: - Key: Raw Value
+        // MARK: Instance Properties
 
         /// The raw value of this key.
         public var rawValue: Int {
@@ -492,8 +498,6 @@ extension KeyEvent {
             }
         }
 
-        // MARK: - Key: String Value
-
         /// A string representation of the key.
         public var stringValue: String {
             switch self {
@@ -716,22 +720,28 @@ extension KeyEvent {
             }
         }
 
-        // MARK: - Key: Init
+        // MARK: Initializers
 
         init?(_ string: String) {
-            let key = Self.allCases.first(where: {
-                $0.stringValue.lowercased() == string.lowercased()
-            })
-            if let key = key {
-                self = key
-            } else {
+            guard let key = Self.allCases.first(where: { $0.stringValue.lowercased() == string.lowercased() }) else {
                 return nil
             }
+            self = key
+        }
+
+        init?(_ character: Character) {
+            self.init(String(character))
         }
     }
 }
 
-// MARK: - Modifiers
+extension KeyEvent.Key: Codable { }
+
+extension KeyEvent.Key: Equatable { }
+
+extension KeyEvent.Key: Hashable { }
+
+// MARK: - KeyEvent.Modifier
 
 extension KeyEvent {
     /// Constants that represent modifier keys associated with a key event.
@@ -760,7 +770,7 @@ extension KeyEvent {
         /// The Shift key.
         case shift
 
-        // MARK: - Modifiers: Raw Value
+        // MARK: Instance Properties
 
         var rawValue: CGEventFlags {
             switch self {
@@ -805,7 +815,7 @@ extension KeyEvent {
             }
         }
 
-        // MARK: - Modifiers: Static Functions
+        // MARK: Static Methods
 
         static func flags(for modifiers: [Self]) -> CGEventFlags {
             var flags = CGEventFlags()
@@ -817,22 +827,8 @@ extension KeyEvent {
     }
 }
 
-// MARK: - Conformances
-
-extension KeyEvent: Codable { }
-
-extension KeyEvent.Key: Codable { }
-
 extension KeyEvent.Modifier: Codable { }
 
-extension KeyEvent: Equatable { }
-
-extension KeyEvent.Key: Equatable { }
-
 extension KeyEvent.Modifier: Equatable { }
-
-extension KeyEvent: Hashable { }
-
-extension KeyEvent.Key: Hashable { }
 
 extension KeyEvent.Modifier: Hashable { }

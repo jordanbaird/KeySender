@@ -25,7 +25,7 @@ import Cocoa
 /// ```
 ///
 /// - Note: The application you send the key events to must currently be running,
-/// or sending the events will fail.
+///   or sending the events will fail.
 public struct KeySender {
     /// The events that will be sent by this key sender.
     public let events: [KeyEvent]
@@ -50,7 +50,7 @@ public struct KeySender {
     /// This initializer works by creating a `KeyEvent` behind the scenes, then adding
     /// it to the instance's `events` property.
     public init(key: KeyEvent.Key, modifiers: [KeyEvent.Modifier]) {
-        self.init(for: .init(key: key, modifiers: modifiers))
+        self.init(for: KeyEvent(key: key, modifiers: modifiers))
     }
 
     /// Creates a sender for the given key and modifiers.
@@ -58,7 +58,7 @@ public struct KeySender {
     /// This initializer works by creating a `KeyEvent` behind the scenes, then adding
     /// it to the instance's `events` property.
     public init(key: KeyEvent.Key, modifiers: KeyEvent.Modifier...) {
-        self.init(for: .init(key: key, modifiers: modifiers))
+        self.init(for: KeyEvent(key: key, modifiers: modifiers))
     }
 
     /// Creates a key sender for the given string.
@@ -73,14 +73,14 @@ public struct KeySender {
     public init(for string: String) throws {
         var events = [KeyEvent]()
         for character in string {
-            guard let key = KeyEvent.Key("\(character)") else {
+            guard let key = KeyEvent.Key(character) else {
                 throw KeySenderError("Invalid character. Cannot create key event.")
             }
-            var event: KeyEvent
+            let event: KeyEvent
             if character.isUppercase {
-                event = .init(key: key, modifiers: [.shift])
+                event = KeyEvent(key: key, modifiers: [.shift])
             } else {
-                event = .init(key: key, modifiers: [])
+                event = KeyEvent(key: key, modifiers: [])
             }
             events.append(event)
         }
@@ -93,32 +93,23 @@ public struct KeySender {
 extension KeySender {
     // Tries to convert a string into an NSRunningApplication.
     private func target(from string: String) throws -> NSRunningApplication {
-        let target = NSWorkspace.shared.runningApplications.first(where: {
-            $0.localizedName == string
-        })
-        guard let target = target else {
-            throw KeySenderError(
-        """
-        Application with name "\(string)" either does not exist, \
-        or is not currently running.
-        """
-            )
+        guard let target = NSWorkspace.shared.runningApplications.first(where: { $0.localizedName == string }) else {
+            throw KeySenderError("Application \"\(string)\" not currently running.")
         }
         return target
     }
 
     private func cgEvent(from keyEvent: KeyEvent, keyDown: Bool) -> CGEvent? {
-        // Create the event.
         let event = CGEvent(
-            keyboardEventSource: .init(stateID: .hidSystemState),
+            keyboardEventSource: CGEventSource(stateID: .hidSystemState),
             virtualKey: CGKeyCode(keyEvent.key.rawValue),
-            keyDown: keyDown)
-        // Give it the appropriate modifiers flags.
+            keyDown: keyDown
+        )
         event?.flags = KeyEvent.Modifier.flags(for: keyEvent.modifiers)
         return event
     }
 
-    // All other send methods delegate to this one.
+    // All local send methods delegate to this one.
     private func sendLocally(event: KeyEvent, application: NSRunningApplication, sendKeyUp: Bool) {
         cgEvent(from: event, keyDown: true)?.postToPid(application.processIdentifier)
         if sendKeyUp {
@@ -126,6 +117,7 @@ extension KeySender {
         }
     }
 
+    // All global send methods delegate to this one.
     private func sendGlobally(event: KeyEvent, sendKeyUp: Bool) {
         cgEvent(from: event, keyDown: true)?.post(tap: .cghidEventTap)
         if sendKeyUp {
@@ -138,8 +130,9 @@ extension KeySender {
 
 extension KeySender {
     /// Sends this instance's events to the given running application.
+    ///
     /// - Parameter application: An instance of `NSRunningApplication` that will receive
-    /// the event.
+    ///   the event.
     public func send(to application: NSRunningApplication, sendKeyUp: Bool = true) {
         for event in events {
             sendLocally(event: event, application: application, sendKeyUp: sendKeyUp)
@@ -147,14 +140,15 @@ extension KeySender {
     }
 
     /// Sends this instance's events to the application with the given name.
+    ///
     /// - Parameter application: The name of the application that will receive the event.
     public func send(to application: String, sendKeyUp: Bool = true) throws {
-        let target = try target(from: application)
-        send(to: target, sendKeyUp: sendKeyUp)
+        try send(to: target(from: application), sendKeyUp: sendKeyUp)
     }
 
     /// Attempts to send this instance's events to the application with the given name,
     /// printing an error to the console if the operation fails.
+    ///
     /// - Parameter application: The name of the application that will receive the event.
     public func trySend(to application: String, sendKeyUp: Bool = true) {
         do {
@@ -191,10 +185,8 @@ extension KeySender {
     /// Sends this instance's events to every running application that matches the
     /// given predicate.
     public func send(where predicate: (NSRunningApplication) throws -> Bool) rethrows {
-        for application in NSWorkspace.shared.runningApplications {
-            if try predicate(application) {
-                send(to: application)
-            }
+        for application in NSWorkspace.shared.runningApplications where try predicate(application) {
+            send(to: application)
         }
     }
 
@@ -209,7 +201,7 @@ extension KeySender {
             let process = Process()
             process.arguments = ["-a", application]
             if #available(macOS 10.13, *) {
-                process.executableURL = .init(fileURLWithPath: "/usr/bin/open")
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
                 try process.run()
             } else {
                 process.launchPath = "/usr/bin/open"
