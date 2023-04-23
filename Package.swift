@@ -4,19 +4,22 @@ import PackageDescription
 
 let package = Package(
     name: "KeySender",
-    platforms: [.macOS(.v10_11)],
+    platforms: [.macOS(.v10_13)],
     products: [
         .library(
             name: "KeySender",
-            targets: ["KeySender"]),
+            targets: ["KeySender"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "KeySender",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "KeySenderTests",
-            dependencies: ["KeySender"]),
+            dependencies: ["KeySender"]
+        ),
     ]
 )
