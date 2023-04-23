@@ -12,20 +12,15 @@ import CoreGraphics
 /// instance of `KeySender`.
 public struct KeyEvent {
     /// The key associated with this key event.
-    public var key: Key
+    public let key: Key
 
     /// The modifier keys associated with this key event.
-    public var modifiers: [Modifier]
+    public let modifiers: Modifiers
 
     /// Creates a key event with the given keys and modifiers.
-    public init(key: Key, modifiers: [Modifier]) {
+    public init(key: Key, modifiers: Modifiers = []) {
         self.key = key
         self.modifiers = modifiers
-    }
-
-    /// Creates a key event with the given keys and modifiers.
-    public init(key: Key, modifiers: Modifier...) {
-        self.init(key: key, modifiers: modifiers)
     }
 }
 
@@ -137,7 +132,7 @@ extension KeyEvent {
         case period
         /// The ANSI "/" key.
         case slash
-        /// The ANSI "`" key.
+        /// The ANSI "\`" key.
         case grave
 
         /// The ANSI keypad Decimal key.
@@ -498,239 +493,56 @@ extension KeyEvent {
             }
         }
 
-        /// A string representation of the key.
-        public var stringValue: String {
-            switch self {
-            case .a:
-                return "a"
-            case .b:
-                return "b"
-            case .c:
-                return "c"
-            case .d:
-                return "d"
-            case .e:
-                return "e"
-            case .f:
-                return "f"
-            case .g:
-                return "g"
-            case .h:
-                return "h"
-            case .i:
-                return "i"
-            case .j:
-                return "j"
-            case .k:
-                return "k"
-            case .l:
-                return "l"
-            case .m:
-                return "m"
-            case .n:
-                return "n"
-            case .o:
-                return "o"
-            case .p:
-                return "p"
-            case .q:
-                return "q"
-            case .r:
-                return "r"
-            case .s:
-                return "s"
-            case .t:
-                return "t"
-            case .u:
-                return "u"
-            case .v:
-                return "v"
-            case .w:
-                return "w"
-            case .x:
-                return "x"
-            case .y:
-                return "y"
-            case .z:
-                return "z"
-            case .zero:
-                return "0"
-            case .one:
-                return "1"
-            case .two:
-                return "2"
-            case .three:
-                return "3"
-            case .four:
-                return "4"
-            case .five:
-                return "5"
-            case .six:
-                return "6"
-            case .seven:
-                return "7"
-            case .eight:
-                return "8"
-            case .nine:
-                return "9"
-            case .minus:
-                return "-"
-            case .equal:
-                return "="
-            case .leftBracket:
-                return "["
-            case .rightBracket:
-                return "]"
-            case .backslash:
-                return "\\"
-            case .semicolon:
-                return ";"
-            case .quote:
-                return "'"
-            case .comma:
-                return ","
-            case .period:
-                return "."
-            case .slash:
-                return "/"
-            case .grave:
-                return "`"
-            case .keypadDecimal:
-                return "."
-            case .keypadMultiply:
-                return "*"
-            case .keypadPlus:
-                return "+"
-            case .keypadClear:
-                return "⌧"
-            case .keypadDivide:
-                return "÷"
-            case .keypadEnter:
-                return "\n"
-            case .keypadMinus:
-                return "-"
-            case .keypadEquals:
-                return "="
-            case .keypad0:
-                return "0"
-            case .keypad1:
-                return "1"
-            case .keypad2:
-                return "2"
-            case .keypad3:
-                return "3"
-            case .keypad4:
-                return "4"
-            case .keypad5:
-                return "5"
-            case .keypad6:
-                return "6"
-            case .keypad7:
-                return "7"
-            case .keypad8:
-                return "8"
-            case .keypad9:
-                return "9"
-            case .return:
-                return "\n"
-            case .tab:
-                return "\t"
-            case .space:
-                return " "
-            case .delete:
-                return "⌫"
-            case .forwardDelete:
-                return "⌦"
-            case .escape:
-                return "⎋"
-            case .volumeUp:
-                return "􏿮"
-            case .volumeDown:
-                return "􏿮"
-            case .mute:
-                return "􏿮"
-            case .home:
-                return "⇱"
-            case .end:
-                return "⇲"
-            case .pageUp:
-                return "⇞"
-            case .pageDown:
-                return "⇟"
-            case .leftArrow:
-                return "←"
-            case .rightArrow:
-                return "→"
-            case .downArrow:
-                return "↓"
-            case .upArrow:
-                return "↑"
-            case .f1:
-                return "F1"
-            case .f2:
-                return "F2"
-            case .f3:
-                return "F3"
-            case .f4:
-                return "F4"
-            case .f5:
-                return "F5"
-            case .f6:
-                return "F6"
-            case .f7:
-                return "F7"
-            case .f8:
-                return "F8"
-            case .f9:
-                return "F9"
-            case .f10:
-                return "F10"
-            case .f11:
-                return "F11"
-            case .f12:
-                return "F12"
-            case .f13:
-                return "F13"
-            case .f14:
-                return "F14"
-            case .f15:
-                return "F15"
-            case .f16:
-                return "F16"
-            case .f17:
-                return "F17"
-            case .f18:
-                return "F18"
-            case .f19:
-                return "F19"
-            case .f20:
-                return "F20"
-            case .isoSection:
-                return "§"
-            case .jisYen:
-                return "¥"
-            case .jisUnderscore:
-                return "_"
-            case .jisKeypadComma:
-                return ","
-            case .jisEisu:
-                return "英数"
-            case .jisKana:
-                return "かな"
+        // MARK: Instance Methods
+
+        /// A string representation of the key, with the given
+        /// modifiers applied.
+        func keyEquivalent(with modifiers: Modifiers) -> String? {
+            guard
+                let inputSource = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
+                let rawLayoutData = TISGetInputSourceProperty(inputSource, kTISPropertyUnicodeKeyLayoutData)
+            else {
+                return nil
             }
+
+            let layoutData = unsafeBitCast(rawLayoutData, to: CFData.self)
+            let keyLayoutPtr = unsafeBitCast(CFDataGetBytePtr(layoutData), to: UnsafePointer<UCKeyboardLayout>.self)
+
+            var deadKeyState: UInt32 = 0
+            var chars = [UniChar](repeating: 0, count: 4)
+            var length = 0
+
+            let result = UCKeyTranslate(
+                keyLayoutPtr,
+                UInt16(rawValue),
+                UInt16(kUCKeyActionDisplay),
+                UInt32(modifiers.carbonFlags >> 8),
+                UInt32(LMGetKbdType()),
+                OptionBits(kUCKeyTranslateNoDeadKeysBit),
+                &deadKeyState,
+                4,
+                &length,
+                &chars
+            )
+
+            guard result == noErr else {
+                return nil
+            }
+
+            return String(utf16CodeUnits: chars, count: length)
         }
 
         // MARK: Initializers
 
-        init?(_ string: String) {
-            guard let key = Self.allCases.first(where: { $0.stringValue.lowercased() == string.lowercased() }) else {
+        init?(_ string: String, modifiers: Modifiers) {
+            guard let key = Self.allCases.first(where: { $0.keyEquivalent(with: modifiers) == string }) else {
                 return nil
             }
             self = key
         }
 
-        init?(_ character: Character) {
-            self.init(String(character))
+        init?(_ character: Character, modifiers: Modifiers) {
+            self.init(String(character), modifiers: modifiers)
         }
     }
 }
@@ -741,94 +553,93 @@ extension KeyEvent.Key: Equatable { }
 
 extension KeyEvent.Key: Hashable { }
 
-// MARK: - KeyEvent.Modifier
+// MARK: - KeyEvent.Modifiers
 
 extension KeyEvent {
     /// Constants that represent modifier keys associated with a key event.
-    public enum Modifier {
+    public struct Modifiers: OptionSet {
+        public let rawValue: UInt64
+
+        public init(rawValue: UInt64) {
+            self.rawValue = rawValue
+        }
+
+        private init(flags: CGEventFlags) {
+            self.init(rawValue: flags.rawValue)
+        }
+
         /// The Caps Lock key.
-        case capsLock
-
-        /// The Command key.
-        case command
-
-        /// The Control key.
-        case control
-
-        /// The Fn (Function) key.
-        case function
-
-        /// The Help key.
-        case help
-
-        /// A key on the numeric pad.
-        case numPad
-
-        /// The Option, or Alt key.
-        case option
+        ///
+        /// Device-independent.
+        public static let capsLock = Self(flags: .maskAlphaShift)
 
         /// The Shift key.
-        case shift
+        ///
+        /// Device-independent.
+        public static let shift = Self(flags: .maskShift)
 
-        // MARK: Instance Properties
+        /// The Control key.
+        ///
+        /// Device-independent.
+        public static let control = Self(flags: .maskControl)
 
-        var rawValue: CGEventFlags {
-            switch self {
-            case .capsLock:
-                return .maskAlphaShift
-            case .command:
-                return .maskCommand
-            case .control:
-                return .maskControl
-            case .function:
-                return .maskSecondaryFn
-            case .help:
-                return .maskHelp
-            case .numPad:
-                return .maskNumericPad
-            case .option:
-                return .maskAlternate
-            case .shift:
-                return .maskShift
-            }
-        }
+        /// The Option, or Alt key.
+        ///
+        /// Device-independent.
+        public static let option = Self(flags: .maskAlternate)
 
-        /// A string representation of the modifier.
-        public var stringValue: String {
-            switch self {
-            case .capsLock:
-                return "⇪"
-            case .command:
-                return "⌘"
-            case .control:
-                return "⌃"
-            case .function:
-                return "fn"
-            case .help:
-                return "􏿮"
-            case .numPad:
-                return "􏿮"
-            case .option:
-                return "⌥"
-            case .shift:
-                return "⇧"
-            }
-        }
+        /// The Command key.
+        ///
+        /// Device-independent.
+        public static let command = Self(flags: .maskCommand)
 
-        // MARK: Static Methods
+        /// A key on the numeric keypad.
+        public static let numericPad = Self(flags: .maskNumericPad)
 
-        static func flags(for modifiers: [Self]) -> CGEventFlags {
-            var flags = CGEventFlags()
-            for modifier in modifiers {
-                flags.insert(modifier.rawValue)
-            }
-            return flags
-        }
+        /// The Help key.
+        public static let help = Self(flags: .maskHelp)
+
+        /// The Fn, or Function key.
+        public static let function = Self(flags: .maskSecondaryFn)
     }
 }
 
-extension KeyEvent.Modifier: Codable { }
+// MARK: Modifiers Properties
+extension KeyEvent.Modifiers {
+    /// The corresponding CGEventFlags.
+    var flags: CGEventFlags {
+        CGEventFlags(rawValue: rawValue)
+    }
 
-extension KeyEvent.Modifier: Equatable { }
+    /// The corresponding Carbon flags.
+    ///
+    /// - Note: The Carbon framework does not define values for the
+    ///   numeric pad, help key, and function key. Occurrences of the
+    ///   corresponding constants found within a `Modifiers` instance
+    ///   will be ignored.
+    var carbonFlags: Int {
+        var result = 0
+        if contains(.capsLock) {
+            result |= alphaLock
+        }
+        if contains(.shift) {
+            result |= shiftKey
+        }
+        if contains(.control) {
+            result |= controlKey
+        }
+        if contains(.option) {
+            result |= optionKey
+        }
+        if contains(.command) {
+            result |= cmdKey
+        }
+        return result
+    }
+}
 
-extension KeyEvent.Modifier: Hashable { }
+extension KeyEvent.Modifiers: Codable { }
+
+extension KeyEvent.Modifiers: Equatable { }
+
+extension KeyEvent.Modifiers: Hashable { }

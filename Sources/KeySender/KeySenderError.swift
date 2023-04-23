@@ -17,3 +17,13 @@ public struct KeySenderError: LocalizedError {
         self.message = message
     }
 }
+
+extension KeySenderError {
+    static func couldNotCreate(_ event: KeyEvent) -> Self {
+        Self("Could not create key event \(event).")
+    }
+
+    static func applicationNotRunning(_ application: String) -> Self {
+        Self("Application \"\(application)\" not currently running.")
+    }
+}

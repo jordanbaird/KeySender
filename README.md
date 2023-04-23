@@ -44,5 +44,5 @@ KeySender is available under the [MIT license](LICENSE).
 
 [ci-badge]: https://img.shields.io/github/actions/workflow/status/jordanbaird/KeySender/ci.yml?branch=main&style=flat-square
 [release-badge]: https://img.shields.io/github/v/release/jordanbaird/KeySender?style=flat-square
-[versions-badge]: https://img.shields.io/badge/Swift-5.5%2B-F05138?style=flat-square
+[versions-badge]: https://img.shields.io/badge/Swift-5.7%2B-F05138?style=flat-square
 [license-badge]: https://img.shields.io/github/license/jordanbaird/KeySender?style=flat-square
