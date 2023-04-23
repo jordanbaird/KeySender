@@ -70,9 +70,9 @@ public class KeySender {
     /// requires the use of some other key combination, use one of this type's
     /// other initializers to construct a key event manually.
     ///
-    /// - Note: Not all Unicode characters can be typed using a standard keyboard,
-    ///   (i.e. emojis or symbols). Character availability may also depend on the
-    ///   locale of individual keyboards and systems.
+    /// - Note: Some Unicode characters, such as emojis and symbols, cannot be
+    ///   typed using a standard keyboard layout. Character availability may
+    ///   also depend on the locale of individual keyboards and systems.
     ///
     /// - Parameter string: A string used to create the key sender's events.
     public convenience init(string: String) {
