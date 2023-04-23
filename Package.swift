@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version: 5.7
 
 import PackageDescription
 
@@ -11,7 +11,6 @@ let package = Package(
             targets: ["KeySender"]
         ),
     ],
-    dependencies: [],
     targets: [
         .target(
             name: "KeySender",
