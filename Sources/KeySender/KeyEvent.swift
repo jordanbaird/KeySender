@@ -6,7 +6,7 @@
 import Cocoa
 
 /// A key event that can be sent by a key sender.
-public class KeyEvent {
+public class KeyEvent: Codable {
 
     // MARK: Properties
 
@@ -71,31 +71,6 @@ public class KeyEvent {
         }
         self.init(cgEvent: cgEvent)
         self._nsEvent = nsEvent
-    }
-
-    public required convenience init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        try self.init(
-            key: container.decode(Key.self, forKey: .key),
-            modifiers: container.decode(Modifiers.self, forKey: .modifiers),
-            kind: container.decode(EventKind.self, forKey: .kind)
-        )
-    }
-}
-
-// MARK: KeyEvent: Codable
-extension KeyEvent: Codable {
-    private enum CodingKeys: CodingKey {
-        case key
-        case modifiers
-        case kind
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(key, forKey: .key)
-        try container.encode(modifiers, forKey: .modifiers)
-        try container.encode(kind, forKey: .kind)
     }
 }
 
