@@ -20,7 +20,7 @@ extension KeyEvent {
             self.rawValue = rawValue
         }
 
-        private init(flags: CGEventFlags) {
+        init(flags: CGEventFlags) {
             self.init(rawValue: flags.rawValue)
         }
 

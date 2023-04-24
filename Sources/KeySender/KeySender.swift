@@ -13,21 +13,18 @@ import Cocoa
 /// call one of the key-sending methods to either send the event globally,
 /// or to a specified running application.
 ///
-/// As long as the receiver can accept the keys that you send, the effect
-/// will be the same as if the keys had been entered manually.
-///
 /// ```swift
 /// // Copies selected text in the "TextEdit" application:
 /// let sender1 = KeySender(key: .c, modifiers: .command)
-/// try sender1.sendTo(applicationNamed: "TextEdit")
+/// try sender1.sendToApplication(named: "TextEdit")
 ///
 /// // Types "Hello" into the "TextEdit" application:
 /// let sender2 = KeySender(string: "Hello")
-/// try sender2.sendTo(applicationNamed: "TextEdit")
+/// try sender2.sendToApplication(named: "TextEdit")
 /// ```
 ///
-/// - Note: If you send the events to an application, it must currently
-///   be running, or sending the events will fail.
+/// As long as the receiver can accept the keys that you send, the effect
+/// will be the same as if the keys had been entered manually.
 public class KeySender {
 
     // MARK: Properties
@@ -51,14 +48,15 @@ public class KeySender {
         self.init(events: [event])
     }
 
-    /// Creates a key sender for a key event created by the given key
-    /// and modifiers.
+    /// Creates a key sender for a key event created using the given key,
+    /// modifiers, and event kind.
     ///
     /// - Parameters:
     ///   - key: A key used to create the key sender's event.
     ///   - modifiers: The modifier keys used to create the key sender's event.
-    public convenience init(key: KeyEvent.Key, modifiers: KeyEvent.Modifiers) {
-        self.init(event: KeyEvent(key: key, modifiers: modifiers))
+    ///   - kind: The event kind used to create the key sender's event.
+    public convenience init(key: KeyEvent.Key, modifiers: KeyEvent.Modifiers = [], kind: KeyEvent.EventKind) {
+        self.init(event: KeyEvent(key: key, modifiers: modifiers, kind: kind))
     }
 
     /// Creates a key sender for the given string.
@@ -77,77 +75,54 @@ public class KeySender {
     /// - Parameter string: A string used to create the key sender's events.
     public convenience init(string: String) {
         let validCombinations: [KeyEvent.Modifiers] = [[], .shift, .option, [.shift, .option]]
-        self.init(events: string.compactMap { character in
+        let orderedEventKinds: [KeyEvent.EventKind] = [.keyDown, .keyUp]
+
+        self.init(events: string.flatMap { character in
             for combination in validCombinations {
                 if let key = KeyEvent.Key(character, modifiers: combination) {
-                    return KeyEvent(key: key, modifiers: combination)
+                    return orderedEventKinds.map { kind in
+                        KeyEvent(key: key, modifiers: combination, kind: kind)
+                    }
                 }
             }
-            return nil
+            return []
         })
     }
 }
 
-// MARK: Helpers
-extension KeySender {
-    // Tries to return a CGEvent from a KeyEvent.
-    private func cgEvent(from keyEvent: KeyEvent, keyDown: Bool) throws -> CGEvent {
-        let event = CGEvent(
-            keyboardEventSource: CGEventSource(stateID: .hidSystemState),
-            virtualKey: CGKeyCode(keyEvent.key.rawValue),
-            keyDown: keyDown
-        )
-        guard let event else {
-            throw KeySenderError.couldNotCreate(keyEvent)
-        }
-        event.flags = keyEvent.modifiers.flags
-        return event
-    }
-}
-
-// MARK: Sending Methods
+// MARK: Instance Methods
 extension KeySender {
     /// Sends this instance's events to the given running application.
     ///
-    /// - Parameters:
-    ///   - application: An instance of `NSRunningApplication` that will receive the event.
-    ///   - sendKeyUp: A Boolean value that indicates whether a corresponding key-up event
-    ///     will be sent with each key-down event. Default is `true`.
-    public func sendTo(runningApplication application: NSRunningApplication, sendKeyUp: Bool = true) throws {
+    /// - Parameter application: An instance of `NSRunningApplication` that will receive the event.
+    public func sendToApplication(_ application: NSRunningApplication) throws {
         for event in events {
-            try cgEvent(from: event, keyDown: true).postToPid(application.processIdentifier)
-            if sendKeyUp {
-                try cgEvent(from: event, keyDown: false).postToPid(application.processIdentifier)
+            guard let cgEvent = event.cgEvent else {
+                throw KeySenderError.couldNotCreate(event)
             }
+            cgEvent.postToPid(application.processIdentifier)
         }
     }
 
     /// Sends this instance's events to the application with the given localized name.
     ///
-    /// - Parameters:
-    ///   - localizedName: The localized name of the application that will receive the event.
-    ///   - sendKeyUp: A Boolean value that indicates whether a corresponding key-up event
-    ///     will be sent with each key-down event. Default is `true`.
-    public func sendTo(applicationNamed localizedName: String, sendKeyUp: Bool = true) throws {
+    /// - Parameter localizedName: The localized name of the application that will receive the event.
+    public func sendToApplication(named localizedName: String) throws {
         guard let application = NSWorkspace.shared.runningApplications.first(where: {
             $0.localizedName == localizedName
         }) else {
             throw KeySenderError.applicationNotRunning(localizedName)
         }
-        try sendTo(runningApplication: application, sendKeyUp: sendKeyUp)
+        try sendToApplication(application)
     }
 
-    /// Sends this instance's events globally, making the events visible to the system, rather
-    /// than a single application.
-    ///
-    /// - Parameter sendKeyUp: A Boolean value that indicates whether a corresponding key-up
-    ///   event will be sent with each key-down event. Default is `true`.
-    public func sendGlobally(sendKeyUp: Bool = true) throws {
+    /// Sends this instance's events to the global event stream.
+    public func sendGlobally() throws {
         for event in events {
-            try cgEvent(from: event, keyDown: true).post(tap: .cghidEventTap)
-            if sendKeyUp {
-                try cgEvent(from: event, keyDown: false).post(tap: .cghidEventTap)
+            guard let cgEvent = event.cgEvent else {
+                throw KeySenderError.couldNotCreate(event)
             }
+            cgEvent.post(tap: .cghidEventTap)
         }
     }
 }

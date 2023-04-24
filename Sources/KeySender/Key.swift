@@ -7,7 +7,7 @@ import Carbon.HIToolbox
 
 extension KeyEvent {
     /// Constants that represent the various keys available on a keyboard.
-    public enum Key: CaseIterable {
+    public enum Key {
 
         // MARK: ANSI
 
@@ -244,9 +244,104 @@ extension KeyEvent {
     }
 }
 
-// MARK: Properties
+// MARK: Instance Methods
 extension KeyEvent.Key {
-    /// The raw value of this key.
+    /// A string representation of the key, with the given modifiers
+    /// applied using the current keyboard layout.
+    func string(with modifiers: KeyEvent.Modifiers) -> String? {
+        guard
+            let inputSource = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
+            let rawLayoutData = TISGetInputSourceProperty(inputSource, kTISPropertyUnicodeKeyLayoutData)
+        else {
+            return nil
+        }
+
+        let layoutData = unsafeBitCast(rawLayoutData, to: CFData.self)
+        let keyLayoutPtr = unsafeBitCast(CFDataGetBytePtr(layoutData), to: UnsafePointer<UCKeyboardLayout>.self)
+
+        var deadKeyState: UInt32 = 0
+        var chars = [UniChar](repeating: 0, count: 4)
+        var length = 0
+
+        let result = UCKeyTranslate(
+            keyLayoutPtr,
+            UInt16(rawValue),
+            UInt16(kUCKeyActionDisplay),
+            UInt32(modifiers.carbonFlags >> 8),
+            UInt32(LMGetKbdType()),
+            OptionBits(kUCKeyTranslateNoDeadKeysBit),
+            &deadKeyState,
+            4,
+            &length,
+            &chars
+        )
+
+        guard result == noErr else {
+            return nil
+        }
+
+        return String(utf16CodeUnits: chars, count: length)
+    }
+}
+
+// MARK: Initializers
+extension KeyEvent.Key {
+    /// Returns the key that produces a character with the specified
+    /// string value when pressed alongside the given modifier keys
+    /// using the current keyboard layout.
+    ///
+    /// If `string` cannot be produced while `modifiers` are pressed,
+    /// `nil` is returned.
+    ///
+    /// The following example assumes an ANSI keyboard layout:
+    ///
+    /// ```swift
+    /// let key = Key("=", modifiers: [])     // Key.equal
+    /// let key = Key("+", modifiers: .shift) // Key.equal
+    /// let key = Key("!", modifiers: .shift) // Key.one
+    /// let key = Key("!", modifiers: [])     // nil
+    /// ```
+    init?(_ string: String, modifiers: KeyEvent.Modifiers) {
+        guard let key = Self.allCases.first(where: { $0.string(with: modifiers) == string }) else {
+            return nil
+        }
+        self = key
+    }
+
+    /// Returns the key that produces a character with the specified
+    /// value when pressed alongside the given modifier keys using the
+    /// current keyboard layout.
+    ///
+    /// If `character` cannot be produced while `modifiers` are pressed,
+    /// `nil` is returned.
+    ///
+    /// The following example assumes an ANSI keyboard layout:
+    ///
+    /// ```swift
+    /// let key = Key("=", modifiers: [])     // Key.equal
+    /// let key = Key("+", modifiers: .shift) // Key.equal
+    /// let key = Key("!", modifiers: .shift) // Key.one
+    /// let key = Key("!", modifiers: [])     // nil
+    /// ```
+    init?(_ character: Character, modifiers: KeyEvent.Modifiers) {
+        self.init(String(character), modifiers: modifiers)
+    }
+}
+
+// MARK: Key: CaseIterable
+extension KeyEvent.Key: CaseIterable { }
+
+// MARK: Key: Codable
+extension KeyEvent.Key: Codable { }
+
+// MARK: Key: Equatable
+extension KeyEvent.Key: Equatable { }
+
+// MARK: Key: Hashable
+extension KeyEvent.Key: Hashable { }
+
+// MARK: Key: RawRepresentable
+extension KeyEvent.Key: RawRepresentable {
     public var rawValue: Int {
         switch self {
         case .a:
@@ -467,97 +562,11 @@ extension KeyEvent.Key {
             return kVK_JIS_Kana
         }
     }
-}
 
-// MARK: Instance Methods
-extension KeyEvent.Key {
-    /// A string representation of the key, with the given modifiers
-    /// applied using the current keyboard layout.
-    func string(with modifiers: KeyEvent.Modifiers) -> String? {
-        guard
-            let inputSource = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),
-            let rawLayoutData = TISGetInputSourceProperty(inputSource, kTISPropertyUnicodeKeyLayoutData)
-        else {
-            return nil
-        }
-
-        let layoutData = unsafeBitCast(rawLayoutData, to: CFData.self)
-        let keyLayoutPtr = unsafeBitCast(CFDataGetBytePtr(layoutData), to: UnsafePointer<UCKeyboardLayout>.self)
-
-        var deadKeyState: UInt32 = 0
-        var chars = [UniChar](repeating: 0, count: 4)
-        var length = 0
-
-        let result = UCKeyTranslate(
-            keyLayoutPtr,
-            UInt16(rawValue),
-            UInt16(kUCKeyActionDisplay),
-            UInt32(modifiers.carbonFlags >> 8),
-            UInt32(LMGetKbdType()),
-            OptionBits(kUCKeyTranslateNoDeadKeysBit),
-            &deadKeyState,
-            4,
-            &length,
-            &chars
-        )
-
-        guard result == noErr else {
-            return nil
-        }
-
-        return String(utf16CodeUnits: chars, count: length)
-    }
-}
-
-// MARK: Initializers
-extension KeyEvent.Key {
-    /// Returns the key that produces a character with the specified
-    /// string value when pressed alongside the given modifier keys
-    /// using the current keyboard layout.
-    ///
-    /// If `string` cannot be produced while `modifiers` are pressed,
-    /// `nil` is returned.
-    ///
-    /// The following example assumes an ANSI keyboard layout:
-    ///
-    /// ```swift
-    /// let key = Key("=", modifiers: [])     // Key.equal
-    /// let key = Key("+", modifiers: .shift) // Key.equal
-    /// let key = Key("!", modifiers: .shift) // Key.one
-    /// let key = Key("!", modifiers: [])     // nil
-    /// ```
-    init?(_ string: String, modifiers: KeyEvent.Modifiers) {
-        guard let key = Self.allCases.first(where: { $0.string(with: modifiers) == string }) else {
+    public init?(rawValue: Int) {
+        guard let key = Self.allCases.first(where: { $0.rawValue == rawValue }) else {
             return nil
         }
         self = key
     }
-
-    /// Returns the key that produces a character with the specified
-    /// value when pressed alongside the given modifier keys using the
-    /// current keyboard layout.
-    ///
-    /// If `character` cannot be produced while `modifiers` are pressed,
-    /// `nil` is returned.
-    ///
-    /// The following example assumes an ANSI keyboard layout:
-    ///
-    /// ```swift
-    /// let key = Key("=", modifiers: [])     // Key.equal
-    /// let key = Key("+", modifiers: .shift) // Key.equal
-    /// let key = Key("!", modifiers: .shift) // Key.one
-    /// let key = Key("!", modifiers: [])     // nil
-    /// ```
-    init?(_ character: Character, modifiers: KeyEvent.Modifiers) {
-        self.init(String(character), modifiers: modifiers)
-    }
 }
-
-// MARK: Key: Codable
-extension KeyEvent.Key: Codable { }
-
-// MARK: Key: Equatable
-extension KeyEvent.Key: Equatable { }
-
-// MARK: Key: Hashable
-extension KeyEvent.Key: Hashable { }
