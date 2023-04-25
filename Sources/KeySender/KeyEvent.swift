@@ -10,7 +10,13 @@ public class KeyEvent: Codable {
 
     // MARK: Properties
 
+    private var cgEventConstructor = Constructor.nilConstructor(for: CGEvent.self)
+    private var nsEventConstructor = Constructor.nilConstructor(for: NSEvent.self)
+
     private lazy var _cgEvent: CGEvent? = {
+        if let cgEvent = cgEventConstructor.take() {
+            return cgEvent
+        }
         let cgEvent = CGEvent(
             keyboardEventSource: CGEventSource(stateID: .hidSystemState),
             virtualKey: CGKeyCode(key.rawValue),
@@ -21,6 +27,9 @@ public class KeyEvent: Codable {
     }()
 
     private lazy var _nsEvent: NSEvent? = {
+        if let nsEvent = nsEventConstructor.take() {
+            return nsEvent
+        }
         guard let _cgEvent else {
             return nil
         }
@@ -61,16 +70,22 @@ public class KeyEvent: Codable {
         }
         let modifiers = Modifiers(flags: cgEvent.flags)
         self.init(key: key, modifiers: modifiers, kind: kind)
-        self._cgEvent = cgEvent
+        self.cgEventConstructor = Constructor(value: cgEvent)
     }
 
     /// Creates a key event from the given Cocoa event.
     public convenience init?(nsEvent: NSEvent) {
-        guard let cgEvent = nsEvent.cgEvent else {
+        guard
+            let cgEvent = nsEvent.cgEvent,
+            let key = Key(rawValue: Int(cgEvent.getIntegerValueField(.keyboardEventKeycode))),
+            let kind = EventKind(cgEventType: cgEvent.type)
+        else {
             return nil
         }
-        self.init(cgEvent: cgEvent)
-        self._nsEvent = nsEvent
+        let modifiers = Modifiers(flags: cgEvent.flags)
+        self.init(key: key, modifiers: modifiers, kind: kind)
+        self.cgEventConstructor = Constructor(value: cgEvent)
+        self.nsEventConstructor = Constructor(value: nsEvent)
     }
 }
 
