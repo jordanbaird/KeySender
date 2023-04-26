@@ -42,29 +42,25 @@ public class KeyEvent {
 
     /// Creates a key event with the given key, modifiers, and event kind.
     public init(key: Key, modifiers: Modifiers, kind: EventKind) {
-        root = .storage(KeyEventRoot.Storage(key: key, modifiers: modifiers, kind: kind))
+        root = .storage(key, modifiers, kind)
     }
 
     /// Creates a key event from the given Core Graphics event.
     public convenience init?(cgEvent: CGEvent) {
-        guard
-            let key = Key(rawValue: Int(cgEvent.getIntegerValueField(.keyboardEventKeycode))),
-            let kind = EventKind(cgEventType: cgEvent.type)
-        else {
+        guard let root = KeyEventRoot(cgEvent) else {
             return nil
         }
-        let modifiers = Modifiers(flags: cgEvent.flags)
-        self.init(key: key, modifiers: modifiers, kind: kind)
-        root = .cgEvent(cgEvent, root.storage)
+        self.init(key: root.key, modifiers: root.modifiers, kind: root.kind)
+        self.root = root
     }
 
     /// Creates a key event from the given Cocoa event.
     public convenience init?(nsEvent: NSEvent) {
-        guard let cgEvent = nsEvent.cgEvent else {
+        guard let root = KeyEventRoot(nsEvent) else {
             return nil
         }
-        self.init(cgEvent: cgEvent)
-        root = .nsEvent(nsEvent, root.storage)
+        self.init(key: root.key, modifiers: root.modifiers, kind: root.kind)
+        self.root = root
     }
 }
 
