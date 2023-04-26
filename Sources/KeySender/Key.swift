@@ -244,6 +244,12 @@ extension KeyEvent {
     }
 }
 
+// MARK: Properties
+extension KeyEvent.Key {
+    /// The key's virtual key code.
+    var virtualKey: CGKeyCode { CGKeyCode(rawValue) }
+}
+
 // MARK: Instance Methods
 extension KeyEvent.Key {
     /// A string representation of the key, with the given modifiers

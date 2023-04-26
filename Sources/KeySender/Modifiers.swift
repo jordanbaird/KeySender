@@ -20,7 +20,7 @@ extension KeyEvent {
             self.rawValue = rawValue
         }
 
-        init(flags: CGEventFlags) {
+        private init(flags: CGEventFlags) {
             self.init(rawValue: flags.rawValue)
         }
 
@@ -71,9 +71,9 @@ extension KeyEvent.Modifiers {
 
     /// This instance's equivalent Carbon flags.
     ///
-    /// - Note: Carbon does not define values for keys on the numeric keypad,
-    ///   the Help key, or the Function key. Occurrences of these keys will be
-    ///   ignored when computing this property.
+    /// - Note: Carbon does not define flags for keys on the numeric keypad,
+    ///   the Help key, or the Function key. Occurrences of these flags are
+    ///   omitted from the result.
     var carbonFlags: Int {
         var result = 0
         if contains(.capsLock) {
