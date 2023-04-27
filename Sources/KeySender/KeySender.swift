@@ -7,24 +7,34 @@ import Cocoa
 
 /// A type that sends key events to the system or any running application.
 ///
-/// To create a key sender, call one of its initializers. You can create
-/// an instance with multiple key events that will be sent in succession,
-/// a single key event, a key and some modifiers, or a string. You then
-/// call one of the key-sending methods to either send the event globally,
-/// or to a specified running application.
+/// To create a key sender, call one of its initializers. You can create an
+/// instance with multiple key events that will be sent in succession, or
+/// provide a string that will automatically be converted into key-down and
+/// key-up events. You then call one of the key-sending methods to either
+/// send the events globally, or to a specific application.
 ///
 /// ```swift
-/// // Copies selected text in the "TextEdit" application:
-/// let sender1 = KeySender(key: .c, modifiers: .command)
+/// // Copies selected text from the "TextEdit" application:
+/// let sender1 = KeySender(events: [
+///     KeyEvent(key: .c, modifiers: .command, kind: .keyDown),
+///     KeyEvent(key: .c, modifiers: .command, kind: .keyUp),
+/// ])
 /// try sender1.sendToApplication(named: "TextEdit")
 ///
-/// // Types "Hello" into the "TextEdit" application:
-/// let sender2 = KeySender(string: "Hello")
-/// try sender2.sendToApplication(named: "TextEdit")
+/// // Pastes the copied text using the global event stream:
+/// let sender2 = KeySender(events: [
+///     KeyEvent(key: .v, modifiers: .command, kind: .keyDown),
+///     KeyEvent(key: .v, modifiers: .command, kind: .keyUp),
+/// ])
+/// try sender2.sendGlobally()
+///
+/// // Types "Hello, world!" into the "TextEdit" application:
+/// let sender3 = KeySender(string: "Hello, world!")
+/// try sender3.sendToApplication(named: "TextEdit")
 /// ```
 ///
-/// As long as the receiver can accept the keys that you send, the effect
-/// will be the same as if the keys had been entered manually.
+/// As long as the receiver can accept the keys that you send, the effect will
+/// be the same as if the keys had been entered manually.
 public class KeySender {
 
     // MARK: Properties
@@ -36,7 +46,7 @@ public class KeySender {
 
     /// Creates a key sender for the given key events.
     ///
-    /// - Parameter events: The key events that are sent by the created key sender.
+    /// - Parameter events: The key events that are sent by the returned key sender.
     public init(events: [KeyEvent]) {
         self.events = events
     }

@@ -19,10 +19,14 @@ public struct KeySenderError: LocalizedError {
 }
 
 extension KeySenderError {
+    /// An error that indicates that a system event could not be
+    /// created from the specified key event.
     static func couldNotCreate(_ event: KeyEvent) -> Self {
-        Self("Could not create key event \(event).")
+        Self("Could not create system event from key event \(event).")
     }
 
+    /// An error that indicates that no application with the
+    /// specified name is currently running.
     static func applicationNotRunning(_ application: String) -> Self {
         Self("Application \"\(application)\" not currently running.")
     }

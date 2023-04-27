@@ -17,6 +17,10 @@ extension KeyEvent {
 }
 
 extension KeyEvent.EventKind {
+    /// Creates an event kind for the given Core Graphics event type.
+    ///
+    /// The provided event type must be either `.keyUp` or `.keyDown`,
+    /// or this initializer will return `nil`.
     init?(cgEventType: CGEventType) {
         switch cgEventType {
         case .keyUp:
