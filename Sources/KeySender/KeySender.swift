@@ -9,22 +9,20 @@ import Cocoa
 ///
 /// To create a key sender, call one of its initializers. You can create an
 /// instance with multiple key events that will be sent in succession, or
-/// provide a string that will automatically be converted into key-down and
-/// key-up events. You then call one of the key-sending methods to either
-/// send the events globally, or to a specific application.
+/// provide a string that will automatically be converted into key-press events.
+/// You then call one of the available key-sending methods to send the events
+/// to the global event stream, or to a specific application.
 ///
 /// ```swift
 /// // Copies selected text from the "TextEdit" application:
 /// let sender1 = KeySender(events: [
-///     KeyEvent(key: .c, modifiers: .command, kind: .keyDown),
-///     KeyEvent(key: .c, modifiers: .command, kind: .keyUp),
+///     KeyEvent(key: .c, modifiers: .command, kind: .keyPress)
 /// ])
 /// try sender1.sendToApplication(named: "TextEdit")
 ///
 /// // Pastes the copied text using the global event stream:
 /// let sender2 = KeySender(events: [
-///     KeyEvent(key: .v, modifiers: .command, kind: .keyDown),
-///     KeyEvent(key: .v, modifiers: .command, kind: .keyUp),
+///     KeyEvent(key: .v, modifiers: .command, kind: .keyPress)
 /// ])
 /// try sender2.sendGlobally()
 ///
@@ -53,36 +51,32 @@ public class KeySender {
 
     /// Creates a key sender for the given string.
     ///
-    /// The returned key sender contains a key-down and key-up event for every
-    /// valid character in the string. If the key combination needed to type a
-    /// character cannot be determined, the character will be skipped. Valid
-    /// characters are those that can be typed without the use of additional
-    /// modifiers and those that can be typed while holding down a combination
-    /// of the Shift and Option modifiers. To send a character that requires
-    /// the use of some other key combination, use ``init(events:)`` to create
-    /// a key sender from an array of manually constructed events.
+    /// The returned key sender contains a key-press event for every valid
+    /// character in the string. If the key combination needed to type a character
+    /// cannot be determined, the character will be skipped. Valid characters are
+    /// those that can be typed without the use of additional modifiers and those
+    /// that can be typed while holding down a combination of the Shift and Option
+    /// modifiers. To send a character that requires the use of some other key
+    /// combination, use ``init(events:)`` to create a key sender from an array of
+    /// manually constructed events.
     ///
-    /// - Note: Many Unicode characters, such as emojis and symbols, cannot be
-    ///   typed using a standard keyboard layout. Character availability may
-    ///   also depend on the locale of individual keyboards and systems.
+    /// - Note: Many Unicode characters, such as emojis and symbols, cannot be typed
+    ///   using a standard keyboard layout. Character availability may also depend on
+    ///   the locale of individual keyboards and systems.
     ///
     /// - Parameter string: A string used to create the returned key sender's events.
     ///
-    /// - Returns: A key sender containing a key-down and key-up event for every
-    ///   valid character in `string`.
+    /// - Returns: A key sender containing a key-press event for every valid character
+    ///   in `string`.
     public convenience init(string: String) {
-        let validCombinations: [KeyEvent.Modifiers] = [[], .shift, .option, [.shift, .option]]
-        let orderedEventKinds: [KeyEvent.EventKind] = [.keyDown, .keyUp]
-
-        self.init(events: string.flatMap { character in
-            for combination in validCombinations {
-                if let key = KeyEvent.Key(character, modifiers: combination) {
-                    return orderedEventKinds.map { kind in
-                        KeyEvent(key: key, modifiers: combination, kind: kind)
-                    }
+        let validModifiers: [KeyEvent.Modifiers] = [[], .shift, .option, [.shift, .option]]
+        self.init(events: string.compactMap { character in
+            for modifiers in validModifiers {
+                if let key = KeyEvent.Key(character, modifiers: modifiers) {
+                    return KeyEvent(key: key, modifiers: modifiers, kind: .keyPress)
                 }
             }
-            return []
+            return nil
         })
     }
 }
@@ -94,10 +88,12 @@ extension KeySender {
     /// - Parameter application: An instance of `NSRunningApplication` that will receive the event.
     public func sendToApplication(_ application: NSRunningApplication) throws {
         for event in events {
-            guard let cgEvent = event.makeCGEvent() else {
-                throw KeySenderError.couldNotCreate(event)
+            for converted in event.convertToSimpleEvents() {
+                guard let cgEvent = converted.makeCGEvent() else {
+                    throw KeySenderError.couldNotCreate(converted)
+                }
+                cgEvent.postToPid(application.processIdentifier)
             }
-            cgEvent.postToPid(application.processIdentifier)
         }
     }
 
@@ -116,10 +112,12 @@ extension KeySender {
     /// Sends this instance's events to the global event stream.
     public func sendGlobally() throws {
         for event in events {
-            guard let cgEvent = event.makeCGEvent() else {
-                throw KeySenderError.couldNotCreate(event)
+            for converted in event.convertToSimpleEvents() {
+                guard let cgEvent = converted.makeCGEvent() else {
+                    throw KeySenderError.couldNotCreate(converted)
+                }
+                cgEvent.post(tap: .cghidEventTap)
             }
-            cgEvent.post(tap: .cghidEventTap)
         }
     }
 }

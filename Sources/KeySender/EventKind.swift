@@ -8,28 +8,15 @@ import CoreGraphics
 extension KeyEvent {
     /// Constants that specify the kind of a key event.
     public enum EventKind {
-        /// The key is not being pressed.
+        /// A single key-up event.
         case keyUp
 
-        /// The key is being pressed.
+        /// A single key-down event.
         case keyDown
-    }
-}
 
-extension KeyEvent.EventKind {
-    /// Creates an event kind for the given Core Graphics event type.
-    ///
-    /// The provided event type must be either `.keyUp` or `.keyDown`,
-    /// or this initializer will return `nil`.
-    init?(cgEventType: CGEventType) {
-        switch cgEventType {
-        case .keyUp:
-            self = .keyUp
-        case .keyDown:
-            self = .keyDown
-        default:
-            return nil
-        }
+        /// A balanced key-press event; that is, a key-down
+        /// event followed by a key-up event.
+        case keyPress
     }
 }
 

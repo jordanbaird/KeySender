@@ -30,9 +30,26 @@ public struct KeyEvent {
 
     // MARK: Instance Methods
 
+    /// Returns this event as an array of events where each event
+    /// has been reduced to the most simple kind possible.
+    func convertToSimpleEvents() -> [Self] {
+        switch kind {
+        case .keyUp, .keyDown:
+            return [self]
+        case .keyPress:
+            return [
+                Self(key: key, modifiers: modifiers, kind: .keyDown),
+                Self(key: key, modifiers: modifiers, kind: .keyUp),
+            ]
+        }
+    }
+
     /// Creates and returns a Core Graphics event with the same key,
     /// modifiers, and event kind as this key event.
     func makeCGEvent() -> CGEvent? {
+        guard kind != .keyPress else {
+            return nil
+        }
         let cgEvent = CGEvent(
             keyboardEventSource: CGEventSource(stateID: .hidSystemState),
             virtualKey: key.virtualKey,
