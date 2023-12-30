@@ -1,6 +1,6 @@
 # KeySender
 
-[![Continuous Integration][ci-badge]](https://github.com/jordanbaird/KeySender/actions/workflows/ci.yml)
+[![Continuous Integration][ci-badge]](https://github.com/jordanbaird/KeySender/actions/workflows/test.yml)
 [![Swift Versions][versions-badge]](https://github.com/jordanbaird/KeySender)
 [![Release][release-badge]](https://github.com/jordanbaird/KeySender/releases/latest)
 [![License][license-badge]](LICENSE)
@@ -42,7 +42,7 @@ As KeySender is under active development, source stability is not guaranteed bet
 
 KeySender is available under the [MIT license](LICENSE).
 
-[ci-badge]: https://img.shields.io/github/actions/workflow/status/jordanbaird/KeySender/ci.yml?branch=main&style=flat-square
+[ci-badge]: https://img.shields.io/github/actions/workflow/status/jordanbaird/KeySender/test.yml?branch=main&style=flat-square
 [release-badge]: https://img.shields.io/github/v/release/jordanbaird/KeySender?style=flat-square
 [versions-badge]: https://img.shields.io/badge/Swift-5.9%2B-F05138?style=flat-square
 [license-badge]: https://img.shields.io/github/license/jordanbaird/KeySender?style=flat-square
